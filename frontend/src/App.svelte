@@ -84,7 +84,7 @@
     {/if}
     <ul>
       {#each rows as row}
-        <li>{row.herb} · {row.verdict} · {row.reason} · 温度 {row.doc.steps[0].minutes} · 时长 {row.doc.steps[0].temp_c}</li>
+        <li>{row.herb} · {row.verdict} · {row.reason} · 温度 {row.doc.steps[0].temp_c} · 时长 {row.doc.steps[0].minutes}</li>
       {/each}
     </ul>
   {/if}

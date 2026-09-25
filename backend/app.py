@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 from psycopg.rows import dict_row
 
 from rules import judge
-from temp_minutes_swap import assemble_steps, project_list, project_detail
 
 SECRET = os.environ.get("JWT_SECRET", "herb-process-dev-secret")
 DSN = os.environ.get("DATABASE_URL", "postgresql://app:app@localhost:54393/herb")
@@ -114,12 +113,12 @@ def login(body: LoginIn):
 def list_batches(_user: dict = Depends(current_user)):
     with connect() as conn:
         rows = conn.execute("SELECT id, herb, doc, verdict, reason, created_by FROM batches ORDER BY id DESC").fetchall()
-    return project_list(rows)
+    return [dict(r) for r in rows]
 
 
 @app.post("/api/batches", status_code=201)
 def create_batch(body: BatchIn, user: dict = Depends(require_writer)):
-    doc = {"steps": assemble_steps([s.model_dump() for s in body.steps])}
+    doc = {"steps": [s.model_dump() for s in body.steps]}
     verdict, reason = judge(doc)
     with connect() as conn:
         row = conn.execute(
@@ -141,4 +140,4 @@ def get_batch(batch_id: int, _user: dict = Depends(current_user)):
         ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="未找到")
-    return project_detail(dict(row))
+    return dict(row)
